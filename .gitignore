@@ -1,0 +1,18 @@
+# Local secrets and session artifacts
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+node_modules/
+.vercel/
+.n8n/
+supabase/.temp/
+*.sqlite
+*.sqlite-*
+*.db
+credentials*.json
+*service-role*.json
+*.log
+.DS_Store
