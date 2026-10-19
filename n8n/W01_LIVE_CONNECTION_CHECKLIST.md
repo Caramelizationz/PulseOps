@@ -4,7 +4,7 @@
 
 **Project:** Personal — Jonas Viray (`MCPuPmeRmurDUeLx`).
 
-**Status: UNPUBLISHED, STAGING ONLY.** The workflow has **no Google Drive trigger, no external HTTP write, no active schedule**, and does not insert rows into Supabase.
+**Status: UNPUBLISHED, STAGING ONLY.** The workflow now includes an OAuth-authenticated folder-specific Google Drive trigger and a guarded Supabase POST node, but the POST node is DISABLED, no live schedule is active, and nothing is being written to Supabase.
 
 ## Verified test results
 
@@ -17,17 +17,18 @@
 
 ## Mandatory external setup before going live
 
-1. **User supplies/approves the exact creator-upload Google Drive folder URL or ID.** Do not watch arbitrary folders, shared drives or the ChatGPT-connected Drive account by assumption. No matching named PulseOps/creator folder was found via a limited Drive search.
-2. Create/authorize a **Google Drive OAuth2** credential within the **n8n instance itself** and grant only the required Drive permissions. The separate ChatGPT Google Drive connection cannot be reused automatically. W01 currently has **zero n8n credentials**.
-3. Set the Google Drive Trigger to the approved folder, filter for newly completed video uploads; verify returned metadata includes the true parent folder, MIME, byte size and file ID. Check unsupported/trashed/empty files.
-4. Configure a secure server-side Supabase integration credential (or narrow-scope Edge Function). Existing RPC currently requires `service_role`; DO NOT put the secret key in workflow JSON, browser scripts, GitHub, logs or user messages. Store secrets in n8n Credential manager / Supabase secrets only. Consider a scoped proxy instead of providing n8n with a broadly privileged key.
-5. Connect the valid branch to the server-side ingestion endpoint only after test and authorization. Keep duplicate receipt/outbox behavior intact and do not create an editor assignment where no verified editor exists.
-6. Test real approved Drive upload → n8n execution → matching `public.pulseops_source_clips` and `public.pulseops_jobs` records → secure dashboard. Repeat trigger to confirm one clip and job. Keep test content segregated.
-7. Add real alerts only after recipients and notification channel are explicitly confirmed. Do not activate WhatsApp Channel automation.
+1. **Completed:** User-authorized Drive folder `Video folder`: `https://drive.google.com/drive/folders/1wN6mDtXSyTJLKma_-Uf4z4CmHhXx1tNh`. Its metadata identifies Jonas Viray as owner. Folder was confirmed empty.
+2. **Completed:** n8n Google Drive OAuth2 credential `Google Drive account`, bound to workflow's `Google Drive - Video Folder` trigger. Credential lookup confirmed the exact folder ID. Source validation checks exact parent ID and supported MIME / 1–100 MB video size.
+3. **Completed as disabled draft:** Real-only guard to prevent synthetic `TEST-` fixtures from reaching the database. Prepared HTTP Request `POST https://zpeswzwyltgjhyvtqsoa.supabase.co/rest/v1/rpc/pulseops_ingest_drive_clip`, with native n8n Supabase API credential selected but not yet assigned. HTTP Request stays DISABLED.
+4. **User action required:** In personal n8n project → Credentials → Add → **Supabase API**. Host `https://zpeswzwyltgjhyvtqsoa.supabase.co` (no /rest/v1). Enter Supabase project's server-side Secret Key in n8n credential manager only. Do not paste secret into ChatGPT or GitHub. This credential has broad service privileges; consider a scoped proxy before production.
+5. **Next:** Connect created Supabase API credential to disabled HTTP Request node; verify credential and endpoint on safe test records; compare first request and duplicate replay, keep live notifications disabled.
+6. **Next:** Activate W01 only after endpoint is verified and permission to monitor the folder is confirmed. Upload one non-sensitive sample MP4 to approved folder → n8n execution → matching `public.pulseops_source_clips` + `public.pulseops_jobs`. Repeat to check idempotency. The secure dashboard's `/clips` view now displays production jobs.
+7. **Later:** Configure real Editor memberships and confirmed notification channel; no WhatsApp Channel automation.
 
 ## Guardrails
 
 - Existing production frontends and all other user apps remain unchanged.
-- n8n manually tested / unpublished is not proof of live Google Drive ingestion.
+- n8n manually tested / unpublished is not proof of live Google Drive ingestion. The recent combined-trigger test via ChatGPT was blocked by connection safety checks, so it is not a passing test.
+- Current secure dashboard: https://pulseops-secure-workspace.vercel.app/clips (deployed with job/source-clip querying, empty until live intake).
 - This workflow's `rpc_payload` is a prepared JSON object, not a real HTTP request.
 - Review Supabase schema + RLS security with user before changing privileges. Never expose service-role keys in a client.
