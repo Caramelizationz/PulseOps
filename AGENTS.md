@@ -1,4 +1,4 @@
-# Instructions for Codex working on PulseOps
+# Instructions for Codex working on PulseOps.
 
 Read `README.md` and **`docs/CODEX_N8N_HANDOFF.md`** before modifying any code.
 
