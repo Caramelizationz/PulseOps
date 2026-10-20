@@ -1,53 +1,62 @@
-# PulseOps — Content Command Center
+# PulseOps — Content Operations Command Center
 
-Private source repository for the AI Operations Lead **Track B** assessment and prototype. This repository contains the **latest hosted source** for both separately deployed frontends.
+**AI Operations Lead paid assessment · Track B · Current project snapshot: October 20, 2026**
 
-## Applications
+This private repository contains source code, database migrations, and verification notes for an independent, connected content-operations prototype. Development and test work occurred across multiple commits; this summary reports the current working state, **not** a claim that all work was completed within a particular time limit.
 
-| Application | Source | Hosted URL | Data |
-| --- | --- | --- | --- |
-| Public assessment demo | `apps/demo/index.html` | https://pulseops-command-center-demo.vercel.app/login | Synthetic browser-session records and demo-only passcode |
-| Secure operations workspace | `apps/secure-workspace/index.html` | https://pulseops-secure-workspace.vercel.app/login | Supabase Auth, PostgreSQL, RLS and private media bucket |
+## Reviewer deliverable
 
-**Security:** `demo123` is intentionally a non-secret *public sandbox* passcode. Never use it for a real Founder account. Supabase publishable keys may appear in browser code; NEVER commit Supabase secret/service-role keys, n8n API keys, Google OAuth tokens, credentials, session exports, or company/private videos.
+**[Final Track B assessment — viewable Google Doc](https://docs.google.com/document/d/1-_J9aeG464Mqvt2uDevqC6lxzpSLziCrYTEglMdyGsM/edit)**
 
-## Clone locally
+- [Public interactive product demo](https://pulseops-command-center-demo.vercel.app/login) — synthetic browser-session data; demonstration passcode `demo123` only.
+- [Authenticated secure workspace](https://pulseops-secure-workspace.vercel.app/login) — real Supabase Auth, PostgreSQL and row-level security; requires an approved account.
+- [Incoming clips and isolated QA jobs](https://pulseops-secure-workspace.vercel.app/clips) — secure login required.
+- [Founder-only system health and internal inbox](https://pulseops-secure-workspace.vercel.app/ops) — secure Founder login required.
+- [Five shareable sample video copies](https://drive.google.com/drive/folders/15iN-VtQbCJAZCDcgv3Umcwqui2yw1k30) — open-license test footage; separate from the monitored private creator folder.
+- [Implementation and QA evidence](docs/SUBMISSION_READY_2026-10-20.md) · [Five-video test report](docs/QA_VIDEO_UPLOADS_2026-10-20.md).
+- The employer submission requires a **separate two-minute Loom** recorded by the applicant; no Loom is included here.
+
+## Live n8n workflows
+
+| Workflow | What is implemented | Live state and evidence |
+| --- | --- | --- |
+| **W01 — Drive intake** | Folder-specific Google Drive OAuth watcher; validates file metadata; filters five QA fixtures; posts real eligible clips via a service-role-only, idempotent Supabase RPC | Active. Drive trigger execution #6; guarded test #18. |
+| **W02 — SLA monitor** | Five-minute checks: 120m idle upload, 45m approval, 90m revision, overdue publishing, and missing 1/4/12/23h views after 10m grace | Active. Manual and scheduled executions succeeded. |
+| **W03 — Founder internal inbox** | Five-minute reconciliation of non-demo events and SLA alerts into durable Founder-only notifications | Active. Internal only; no email, Slack or WhatsApp sends. |
+| **W06 — Self-healing guardian** | Fifteen-minute detection of expired undelivered event leases; bounded recovery and system heartbeat | Active. Simulated expired-lease recovery tested transactionally. |
+| **W07 — Missed-upload reconciliation** | Fifteen-minute recovery scan of approved folder; demo fixtures excluded; idempotent backfill, bounded HTTP retries | Active. Five demo files correctly skipped during test. |
+
+n8n workflows live in the personal instance: https://caramelcrusade.app.n8n.cloud. Credential values live in the encrypted n8n credential manager and are **not** checked into this repository.
+
+## What was actually verified
+
+- Five different CC0-labeled sample MP4 files were uploaded to the private test Drive folder.
+- The controlled manual QA workflow ingested **five demo clips** and **five demo jobs** in Supabase.
+- Replaying the five inputs returned `duplicate=true` for each and created **zero extra jobs**.
+- Database verification reported **0 non-demo clips/jobs, 0 notification outbox events, 0 actual SLA alerts** from those fixtures.
+- Rollback-only SQL tests covered SLA exception detection/replay/resolution, Founder inbox event deduplication, and expired-lease recovery.
+- The authenticated workspace and public demo deployments were checked online. Production Vercel applications are still deployed via direct source upload rather than GitHub-connected automatic deployment.
+
+**Not yet tested or authorized:** employer Drive access, two verified Editor accounts and real dual-account approval handoff, external notification recipients, real WhatsApp Channel posting/view retrieval, or a Founder digest with an approved timezone. WhatsApp posting and post view recording remain **manual**; no Channel automation is claimed. Commercial production operation and long-term uptime have not been validated.
+
+## Repository layout
+
+- `apps/demo/` — public, fully synthetic interactive product demonstration.
+- `apps/secure-workspace/` — authenticated Supabase dashboard.
+- `supabase/` — existing schema reference plus incremental applied migrations. Do **not** replay the complete reference schema against the live project.
+- `n8n/` — workflow IDs, automation documentation and safe integration runbooks.
+- `docs/` — architectural background, QA reports, test evidence and reviewer context. `docs/CODEX_N8N_HANDOFF.md` is an earlier planning handoff and should not be used as the current runtime status.
+
+## Running locally and security
 
 ```bash
 git clone https://github.com/Caramelizationz/PulseOps.git
-cd PulseOps
-```
-
-Both applications currently use self-contained static HTML/CSS/JS, so a static development server is sufficient:
-
-```bash
-cd apps/demo
+cd PulseOps/apps/demo
 python -m http.server 8080
 ```
 
-Then visit http://localhost:8080/login (your local server may require a SPA route fallback for deep links, see `vercel.json`). The secure workspace also requires configuring the localhost redirect URL in Supabase Auth.
+Local deep links may require the configured SPA rewrite. The secure app additionally requires Supabase Auth redirect configuration.
 
-## Repo layout
+Never commit Supabase service-role/secret keys, n8n credentials, OAuth tokens, or other private authentication material. The public passcode `demo123` is solely for synthetic demo content, not real authentication. Founder decisions remain role-protected in Supabase; no automation approves on behalf of the Founder. The original `caramelization` portfolio and unrelated organizations are outside this project.
 
-- `apps/demo/`: public sandbox with simulated Founder/Editor actions and synthetic content.
-- `apps/secure-workspace/`: authenticated Supabase client UI and database-enforced roles.
-- `supabase/`: existing project schema documentation and migrations guidance.
-- `n8n/`: planned workflow integration and security contract; **not connected**.
-- `docs/`: Codex integration plan, QA status and submission context.
-
-## Current status
-
-- The two sites are already deployed via **direct Vercel uploads**, not GitHub-connected deployment.
-- Supabase project: `zpeswzwyltgjhyvtqsoa`. Keep using the existing personal project; do not touch Cynergists or the `caramelization` portfolio.
-- Private database has four PulseOps tables and role-gated RPCs. A Founder account exists. Editor onboarding and real multi-user browser tests are still pending.
-- Google Drive/n8n and WhatsApp **are not live**. A future `WhiskeySockets/Baileys` proof of concept is proposed only; it is unofficial and carries account/ToS risk.
-- The original Node/SQLite reference prototype **is not** the secure hosted backend. Do not replace either deployed UI with that older code.
-- Codex should use `docs/CODEX_N8N_HANDOFF.md` before creating workflows.
-
-## Git / Vercel integration
-
-Vercel production aliases are maintained as-is. The existing projects are not yet Git-linked. When connecting them to this monorepo, configure separate roots `apps/demo` and `apps/secure-workspace`, retain SPA rewrites, and validate before changing production deployments.
-
-## Integrity
-
-This is an assessment prototype with an intentionally public demo. Do not claim WhatsApp posting, Channel analytics, Google Drive monitoring, live n8n executions, or 40 real posts/day.
+**Evidence date:** October 20, 2026. Historical Git commit timestamps remain unaltered.
