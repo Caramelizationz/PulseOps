@@ -36,3 +36,36 @@ For the end-to-end test, either re-trigger five sample videos (e.g. copy into fo
 2. Ensure secure app /clips can see the new jobs and test duplicate delivery.
 3. Exclude these `pulseops-test-` fixture clips from real output KPIs and notifications (existing DB ingest helper defaults `is_demo=false`, so test markers must be implemented before production ingestion).
 4. Keep WhatsApp Channel publishing and external notifications disabled.
+
+## QA-only Supabase ingestion — completed
+
+- QA RPC: `public.pulseops_ingest_qa_video`, accessible **only** to effective Postgres `service_role`. Its exact allowlist contains only the five Drive file IDs, original filenames, sizes, MIME type, and parent folder used in this run. It delegates idempotent intake to the existing server-side function and marks both the clip and job `is_demo=true` inside the same transaction, removing its intermediate outbox event before commit.
+- n8n manual workflow: [QA — Secure Ingest Approved Drive Videos](https://caramelcrusade.app.n8n.cloud/workflow/TGJMijKRtCs6cGjE); **unpublished** and runs only when manually executed. Credential remains in n8n, not GitHub.
+- Execution `7`: 403 due to legacy JWT claim check; no inserted records.
+- Execution `8`: read-only role probe showed `effective_service_role=true`, `jwt_claim_service_role=false`, confirming newer Supabase secret-key authentication needs an actual DB role check.
+- Executions `9` and `10`: caught role-check issue in QA wrapper and permission-denied issue while reading protected `auth.users`; fixes were applied while keeping anonymous/authenticated callers denied.
+- Execution `11`: first actual QA POST **success**, with demo clip and demo unassigned job, zero outbox event.
+- Execution `12`: all five POSTs **success**; first clip duplicate=true, other four created. Five distinct sample clip IDs and five distinct jobs.
+- Execution `13`: all five POSTs **success**, each returned duplicate=true with the **same clip/job IDs** as execution 12.
+
+Verified database state after execution `12`:
+```text
+approved_clips     5       distinct_drive_ids    5
+both_demo          5       unassigned_jobs       5
+marked_qa          5       drive_receipts        5
+outbox_all         0       alerts_all            0
+real_clips         0       real_jobs             0
+```
+
+The secure Founder app now shows these under a **separate QA-only section** in the [Incoming Clips](https://pulseops-secure-workspace.vercel.app/clips) page; production uploaded clip/job totals remain unaffected. The updated UI deployed as production deployment `dpl_HfnqX9C9DEy3BCf4GesoMLCgT1Bt`, READY.
+
+**Separation is intentional:** Do not enable the ordinary W01 Supabase POST node based on these QA results. W01 is active as a **monitoring-only** Drive watcher, and its existing standard HTTP writer remains **disabled**; test backfill is through the manually executed QA-only workflow. No external WhatsApp, Slack, or other notifications have been configured or sent.
+
+### Security notes
+
+- `public.pulseops_ingest_drive_clip` uses an effective `service_role` check (supports Supabase server Secret Keys); it still has `SECURITY INVOKER` and `EXECUTE` restricted to `service_role`.
+- Editor verification uses `pulseops_private.first_verified_editor()`, a narrowly scoped `SECURITY DEFINER` function in the **unexposed private schema**, executable only by `service_role`. This avoids granting broad `auth.users` access to n8n.
+- Supabase security advisor still reports pre-existing findings for RLS-enabled server-only outbox/receipt tables (INFO), authenticated SECURITY DEFINER application RPCs (intentional workflow paths to review), and disabled leaked-password protection (Auth hardening).
+- The QA-only role probe is restricted to `service_role`; it returns only two boolean fields, no keys.
+
+**Remaining tasks:** explicitly switch on authenticated real ingestion after test folder semantics and live notification guardrails are approved; invite a verified Editor; end-to-end Founder UI review; W02 SLA workflow; W03 outbox dispatcher and W04 manual channel metrics. Do not claim those are completed.
