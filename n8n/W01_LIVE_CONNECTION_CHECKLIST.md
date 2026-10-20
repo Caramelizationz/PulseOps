@@ -32,3 +32,11 @@
 - Current secure dashboard: https://pulseops-secure-workspace.vercel.app/clips (deployed with job/source-clip querying, empty until live intake).
 - This workflow's `rpc_payload` is a prepared JSON object, not a real HTTP request.
 - Review Supabase schema + RLS security with user before changing privileges. Never expose service-role keys in a client.
+
+## October 20 — Completed QA backfill
+
+- `Supabase account` was attached successfully; verification with `pulseopsApi` changed to proper effective Postgres service-role check.
+- Five specific public test MP4 files were ingested through separate **manual QA-only workflow** `TGJMijKRtCs6cGjE`; executions `11`, `12`, `13` prove success and full deduplication. All five records are `is_demo=true`, no pending outbox/alerts, no real jobs.
+- Secure Incoming Clips page deployed with QA-only section: https://pulseops-secure-workspace.vercel.app/clips.
+- **W01 is active in monitoring-only mode; ordinary Supabase POST remains disabled.** QA-only manual backfill does not automatically enable live production ingestion.
+- Full QA evidence: `docs/QA_VIDEO_UPLOADS_2026-10-20.md`.
