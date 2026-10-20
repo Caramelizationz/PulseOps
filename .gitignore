@@ -1,19 +1,52 @@
-# test
-# Local secrets and session artifacts
+# PulseOps local development, integration, and credential protection
+#
+# This repository documents working n8n/Supabase infrastructure. Do not commit
+# live credentials, downloaded creator footage, runtime logs or local test data.
+# Keep example configs sanitized and explicitly reviewed before committing.
+
+# Secrets and local machine environment
 .env
 .env.*
 !.env.example
+.envrc
 *.pem
 *.key
 *.p12
+credentials*.json
+*credentials*.json
+*service-role*.json
+*secret-key*.json
+*oauth-token*.json
+*.secret.json
+
+# Dependencies, generated bundles and framework state
 node_modules/
+.next/
+dist/
+build/
+coverage/
 .vercel/
 .n8n/
 supabase/.temp/
+
+# Local databases, test output and diagnostic exports
 *.sqlite
 *.sqlite-*
 *.db
-credentials*.json
-*service-role*.json
 *.log
+playwright-report/
+test-results/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# Video files belong in authorized private Drive/Storage, not Git history.
+# The five public CC0 QA copies are linked from the assessment document.
+*.mp4
+*.mov
+*.webm
+*.mkv
+
+# OS/editor cache
 .DS_Store
+Thumbs.db
