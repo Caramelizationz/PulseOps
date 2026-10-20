@@ -1,13 +1,20 @@
-# n8n — implementation scope
+# PulseOps — n8n live workflow register
 
-The current deployed apps do **not** have live n8n workflows. No credentials or workflow IDs have been connected.
+**Verified runtime snapshot: October 20, 2026.** This file replaces the earlier pre-connection plan. Workflow definitions and encrypted credentials reside inside the user's personal n8n instance. This repository stores verified IDs, runbooks and SQL migrations; it does not contain exported credentials.
 
-Read **[Codex integration handoff](../docs/CODEX_N8N_HANDOFF.md)** before building workflows.
+| ID | Workflow | Status | Schedule | Scope |
+| --- | --- | --- | --- | --- |
+| `UP3HFHLjUC7nlxXL` | W01 — Live Drive Intake (Demo-Safe) | **Active** | Google Drive file-created trigger | Validates approved private folder metadata; excludes five test videos; real-event Supabase RPC with retry |
+| `dlUKTDPmr4ddH4Yb` | W02 — SLA Monitoring and Auto-Resolution | **Active** | Every 5 min | Detects/report/resolves real overdue milestones, idempotent |
+| `0g4j2eQP0cZVkueM` | W03 — Founder Internal Inbox | **Active** | Every 5 min | Founder-only stored in-app notices for actual events/alerts; no external messages |
+| `kGatkfxfGmAE96BU` | W06 — Self-Healing Guardian | **Active** | Every 15 min | Reclaims expired event leases, stores health heartbeat |
+| `oOVNskQfkDRqqwaI` | W07 — Drive Reconciliation | **Active** | Every 15 min | Scans same folder, excludes demo videos and backfills genuinely missed uploads |
+| `TGJMijKRtCs6cGjE` | QA video backfill | Inactive/manual only | On demand | Exact allowlist of five open-license MP4s; all records marked `is_demo` |
 
-Planned workflows: `W01 Drive upload intake`, `W02 SLA watchdog`, `W03 outbox notification relay`, `W04 publication/view-checkpoint reminders`, `W05 Founder morning digest (optional)`.
+*Demo ingestion proof:* execution #12 ingested five sample videos; #13 returned five duplicate responses with stable clip and job IDs, no extra records. Dry-run and scheduled tests are documented in [submission readiness evidence](../docs/SUBMISSION_READY_2026-10-20.md) and [QA upload report](../docs/QA_VIDEO_UPLOADS_2026-10-20.md).
 
-Implement against the **Supabase secure backend**; never send production webhook events to the public demo or copy service-role keys into static files. Keep exported workflow JSON redacted, with credentials maintained in n8n's credential manager. One Drive source video may yield multiple publishable frames.
+**Security:** The original monitored Google Drive folder remains private. A separate public-viewer folder contains copied test-only MP4s for the assessment reviewer. The Supabase service credential and Google Drive OAuth remain in n8n Credential manager. Server-only RPCs and RLS restrict real data access. None of the five test uploads contributes to real KPI totals or notification events.
 
-WhatsApp Channel integration using **[WhiskeySockets/Baileys](https://github.com/WhiskeySockets/Baileys)** is only a future *unofficial* research candidate and must not be auto-activated.
+**Not implemented as a live integration:** automatic WhatsApp Channel posting, Channel view scraping, external email/Slack/WhatsApp notifications or the optional morning Founder digest. Actual publication and 1/4/12/23-hour view observations are manual. The company Drive/Editors were not supplied, so no real employer handoff is claimed.
 
-Once created, add workflow exports to `n8n/workflows/` and record workflow IDs, n8n instance version, active state, runbook and reproducible test evidence without exposing secrets.
+The design requirements in [CODEX_N8N_HANDOFF.md](../docs/CODEX_N8N_HANDOFF.md) were drafted before connection; for the current working state refer here and to [README.md](../README.md). Historical commits remain unchanged.
