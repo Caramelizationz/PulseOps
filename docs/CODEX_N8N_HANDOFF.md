@@ -1,3 +1,7 @@
+> **Historical implementation handoff — no longer the current status.** The statement below that n8n was “not currently connected” described the initial planning stage. As of October 20, 2026, W01/W02/W03/W06/W07 are live. Current verified implementation status is in [../README.md](../README.md), [../n8n/README.md](../n8n/README.md), and [SUBMISSION_READY_2026-10-20.md](SUBMISSION_READY_2026-10-20.md). This design brief is retained unchanged below for traceability.
+
+---
+
 # CODEX HANDOFF — PulseOps → n8n live integration
 
 **Status: implementation requested, NOT currently connected.** This is the primary handoff for Codex, to be read after cloning this private repository.
