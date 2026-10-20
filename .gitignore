@@ -1,3 +1,4 @@
+# test
 # Local secrets and session artifacts
 .env
 .env.*
