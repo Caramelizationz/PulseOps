@@ -1,3 +1,7 @@
+> **Historical QA baseline.** This document records early frontend validation before the later n8n integration was completed. Its “NOT verified/live yet” section is deliberately preserved as the earlier state, **not the current status**. For the latest verified workflows and submission evidence as of October 20, 2026, consult [SUBMISSION_READY_2026-10-20.md](SUBMISSION_READY_2026-10-20.md) and [QA_VIDEO_UPLOADS_2026-10-20.md](QA_VIDEO_UPLOADS_2026-10-20.md). The final reviewer deliverable is the [Google Doc](https://docs.google.com/document/d/1-_J9aeG464Mqvt2uDevqC6lxzpSLziCrYTEglMdyGsM/edit). Git history has not been rewritten.
+
+---
+
 # QA / Current State — October 20, 2026
 
 ## Confirmed
